@@ -1,56 +1,55 @@
 #!/usr/bin/python3
+""" N queens problem
+"""
 import sys
 
-# Handle input validation
 if len(sys.argv) != 2:
     print("Usage: nqueens N")
-    sys.exit(1)
+    exit(1)
 
 try:
-    N = int(sys.argv[1])
+    number_q = int(sys.argv[1])
 except ValueError:
     print("N must be a number")
-    sys.exit(1)
+    exit(1)
 
-if N < 4:
+if number_q < 4:
     print("N must be at least 4")
-    sys.exit(1)
+    exit(1)
 
 
-# Define the function to check if it's safe to place a queen
-def is_safe(board, row, col):
-    """Check if it's safe to place a queen at board[row][col]"""
-    # Check column
-    for i in range(row):
-        if board[i] == col:
+def solve_nqueens(number):
+    """ solve n queens problem
+    """
+    if number == 0:
+        return [[]]
+    inner_solution = solve_nqueens(number - 1)
+    return [solution + [(number, i + 1)]
+            for i in range(number_q)
+            for solution in inner_solution
+            if safe_queen((number, i + 1), solution)]
+
+
+def attack_queen(square, queen):
+    """ check if queen is attacking another gouine
+    """
+    (first_row, first_col) = square
+    (second_row, second_col) = queen
+    return (first_row == second_row) or (first_col == second_col) or\
+        abs(first_row - second_row) == abs(first_col - second_col)
+
+
+def safe_queen(square, queens):
+    """ check if queen is safe
+    """
+    for queen in queens:
+        if attack_queen(square, queen):
             return False
-
-    # Check diagonals
-    for i in range(row):
-        if abs(board[i] - col) == abs(i - row):
-            return False
-
     return True
 
 
-# Define the backtracking function to solve N Queens
-def solve_nqueens(N):
-    """Solve the N Queens problem and print all solutions"""
-    def backtrack(row, board):
-        if row == N:
-            # If all queens are placed, print the board configuration
-            print([[i, board[i]] for i in range(N)])
-            return
-
-        for col in range(N):
-            if is_safe(board, row, col):
-                board[row] = col
-                backtrack(row + 1, board)
-                board[row] = -1
-
-    board = [-1] * N
-    backtrack(0, board)
-
-
-# Call the solver
-solve_nqueens(N)
+for answer in reversed(solve_nqueens(number_q)):
+    result = []
+    for answer_list in [list(answer_list) for answer_list in answer]:
+        result.append([i - 1 for i in answer_list])
+    print(result)
